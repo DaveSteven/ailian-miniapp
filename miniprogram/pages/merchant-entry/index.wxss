@@ -312,12 +312,6 @@ page {
   line-height: 1.45;
 }
 
-.coordinates {
-  margin-top: 9rpx;
-  color: #0e8a7c;
-  font-size: 21rpx;
-}
-
 .location-actions {
   display: flex;
   gap: 16rpx;

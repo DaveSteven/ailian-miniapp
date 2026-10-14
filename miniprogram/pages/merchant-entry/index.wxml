@@ -57,7 +57,6 @@
       <view class="location-content">
         <view class="location-name">{{location ? location.name : '尚未选择位置'}}</view>
         <view class="location-address">{{location ? location.address : '建议在商家现场获取当前位置'}}</view>
-        <view class="coordinates" wx:if="{{location}}">GCJ-02 · {{location.latitude}}, {{location.longitude}}</view>
       </view>
     </view>
 
