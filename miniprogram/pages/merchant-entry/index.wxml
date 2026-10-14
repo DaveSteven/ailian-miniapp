@@ -1,0 +1,125 @@
+<view class="page">
+  <view class="intro-card">
+    <view class="intro-badge">地推采集</view>
+    <view class="intro-title">录入商家资料</view>
+    <view class="intro-desc">请在商家现场确认位置，带 * 的项目为必填。</view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">基本信息</view>
+
+    <view class="field">
+      <view class="field-label">商家名称 <text>*</text></view>
+      <input class="field-input" data-field="name" value="{{form.name}}" placeholder="请输入门店或商家名称" maxlength="160" bindinput="onFieldInput" />
+    </view>
+
+    <view class="contact-card" wx:for="{{contacts}}" wx:key="*this">
+      <view class="contact-head">
+        <view class="contact-title">负责人 {{index + 1}} <text wx:if="{{index === 0}}">主要联系人</text></view>
+        <view class="remove-contact" wx:if="{{contacts.length > 1}}" data-index="{{index}}" bindtap="onRemoveContact">删除</view>
+      </view>
+      <view class="field-row">
+        <view class="field field-half compact-field">
+          <view class="field-label">姓名 <text>*</text></view>
+          <input class="field-input" data-index="{{index}}" data-field="name" value="{{item.name}}" placeholder="负责人姓名" maxlength="80" bindinput="onContactInput" />
+        </view>
+        <view class="field field-half compact-field">
+          <view class="field-label">联系电话 <text>*</text></view>
+          <input class="field-input" data-index="{{index}}" data-field="phone" value="{{item.phone}}" placeholder="手机号" type="number" maxlength="11" bindinput="onContactInput" />
+        </view>
+      </view>
+    </view>
+
+    <button class="add-contact" bindtap="onAddContact">＋ 增加负责人</button>
+  </view>
+
+  <view class="section">
+    <view class="section-title">商家图片 <text class="required-mark">*</text></view>
+    <view class="section-help">最少 1 张，最多 5 张。建议包含门头、店内环境或服务现场。</view>
+    <view class="image-grid">
+      <view class="image-item" wx:for="{{merchantImages}}" wx:key="path">
+        <image src="{{item.path}}" mode="aspectFill" data-kind="merchant" data-index="{{index}}" bindtap="onPreviewImage" />
+        <view class="image-remove" data-kind="merchant" data-index="{{index}}" catchtap="onRemoveImage">×</view>
+      </view>
+      <button class="image-add" wx:if="{{merchantImages.length !== 5}}" bindtap="onChooseMerchantImages">
+        <view class="image-add-icon">＋</view>
+        <view>添加图片</view>
+        <view class="image-count">{{merchantImages.length}}/5</view>
+      </button>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">商家位置</view>
+
+    <view class="location-card {{location ? 'selected' : ''}}">
+      <view class="pin">{{location ? '✓' : '⌖'}}</view>
+      <view class="location-content">
+        <view class="location-name">{{location ? location.name : '尚未选择位置'}}</view>
+        <view class="location-address">{{location ? location.address : '建议在商家现场获取当前位置'}}</view>
+        <view class="coordinates" wx:if="{{location}}">GCJ-02 · {{location.latitude}}, {{location.longitude}}</view>
+      </view>
+    </view>
+
+    <view class="location-actions">
+      <button class="location-button primary" loading="{{locating}}" bindtap="onUseCurrentLocation">获取当前地址</button>
+      <button class="location-button secondary" bindtap="onChooseLocation">地图选点</button>
+    </view>
+
+    <view class="field address-field">
+      <view class="field-label">详细地址 <text>*</text></view>
+      <input class="field-input" data-field="addressDetail" value="{{form.addressDetail}}" placeholder="补充楼栋、楼层、门牌号" maxlength="200" bindinput="onFieldInput" />
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">服务信息</view>
+
+    <view class="field">
+      <view class="field-label">服务大类 <text>*</text></view>
+      <picker mode="selector" range="{{categories}}" value="{{categoryIndex}}" bindchange="onCategoryChange">
+        <view class="picker-value {{form.serviceCategory ? '' : 'placeholder'}}">
+          {{form.serviceCategory || '请选择服务大类'}}
+          <text>›</text>
+        </view>
+      </picker>
+    </view>
+
+    <view class="field">
+      <view class="field-label">服务标签</view>
+      <input class="field-input" data-field="serviceTags" value="{{form.serviceTags}}" placeholder="例如：空调维修、冰箱维修" maxlength="120" bindinput="onFieldInput" />
+      <view class="field-tip">多个标签用顿号或逗号分隔</view>
+    </view>
+
+    <view class="field">
+      <view class="field-label">营业时间</view>
+      <input class="field-input" data-field="businessHours" value="{{form.businessHours}}" placeholder="例如：08:00–20:00" maxlength="120" bindinput="onFieldInput" />
+    </view>
+
+    <view class="field">
+      <view class="field-label">备注</view>
+      <textarea class="field-textarea" data-field="note" value="{{form.note}}" placeholder="记录商家特点、上门范围等信息" maxlength="500" bindinput="onFieldInput" />
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">其他资质证明</view>
+    <view class="section-help">选填，可添加营业执照、资格证书或其他证明照片。</view>
+    <view class="image-grid">
+      <view class="image-item" wx:for="{{qualificationImages}}" wx:key="path">
+        <image src="{{item.path}}" mode="aspectFill" data-kind="qualification" data-index="{{index}}" bindtap="onPreviewImage" />
+        <view class="image-remove" data-kind="qualification" data-index="{{index}}" catchtap="onRemoveImage">×</view>
+      </view>
+      <button class="image-add" wx:if="{{qualificationImages.length !== 20}}" bindtap="onChooseQualificationImages">
+        <view class="image-add-icon">＋</view>
+        <view>添加证明</view>
+        <view class="image-count" wx:if="{{qualificationImages.length}}">{{qualificationImages.length}} 张</view>
+      </button>
+    </view>
+  </view>
+
+  <view class="submit-wrap">
+    <button class="submit-button" loading="{{submitting}}" disabled="{{submitting}}" bindtap="onSubmit">{{submitStage}}</button>
+    <view class="submit-tip">提交后将进入审核，不会立即展示给用户</view>
+  </view>
+</view>

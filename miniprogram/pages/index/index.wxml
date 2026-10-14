@@ -1,0 +1,60 @@
+<view class="page">
+  <view class="entry-toolbar">
+    <view class="entry-hint">需要录入新商家？</view>
+    <button class="entry-button" bindtap="onOpenMerchantEntry">地推录入</button>
+  </view>
+
+  <scroll-view class="chat" style="bottom: {{chatBottomPx}}px" scroll-y scroll-into-view="{{scrollIntoView}}">
+    <view class="message-row {{item.role}}" wx:for="{{messages}}" wx:key="id" id="{{item.id}}">
+      <view class="bubble">{{item.content}}</view>
+
+      <view class="merchant-list" wx:if="{{item.merchants && item.merchants.length}}">
+        <view class="merchant-card" wx:for="{{item.merchants}}" wx:for-item="merchant" wx:key="id">
+          <view class="merchant-head">
+            <view>
+              <view class="merchant-name">{{merchant.name}}</view>
+              <view class="merchant-meta">{{merchant.distanceKm}}km · {{merchant.rating}}分 · {{merchant.reviewCount}}条评价</view>
+            </view>
+            <view class="status {{merchant.availableNow ? 'online' : 'offline'}}">
+              {{merchant.availableNow ? '可联系' : '需预约'}}
+            </view>
+          </view>
+
+          <view class="tags">
+            <text class="tag" wx:for="{{merchant.tags}}" wx:for-item="tag" wx:key="*this">{{tag}}</text>
+          </view>
+
+          <view class="price">{{merchant.priceHint}}</view>
+          <view class="merchant-foot">
+            <text>{{merchant.responseTime}}</text>
+            <button class="call-button" size="mini" data-phone="{{merchant.phone}}" bindtap="onCallMerchant">联系</button>
+          </view>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+
+  <view class="footer" style="bottom: {{keyboardHeightPx}}px">
+    <view class="quick-list">
+      <button class="quick-item" wx:for="{{quickNeeds}}" wx:key="*this" data-text="{{item}}" disabled="{{isSending}}" bindtap="onQuickNeed">
+        {{item}}
+      </button>
+    </view>
+
+    <view class="composer">
+      <input
+        class="composer-input"
+        value="{{inputValue}}"
+        placeholder="直接说：我家厨房下水堵了，很急"
+        confirm-type="send"
+        adjust-position="{{false}}"
+        cursor-spacing="0"
+        bindinput="onInput"
+        bindfocus="onInputFocus"
+        bindblur="onInputBlur"
+        bindconfirm="onSend"
+      />
+      <button class="send-button {{isSending ? 'sending' : ''}}" aria-label="发送" disabled="{{isSending}}" bindtap="onSend">↑</button>
+    </view>
+  </view>
+</view>

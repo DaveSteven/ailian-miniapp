@@ -1,0 +1,268 @@
+page {
+  height: 100vh;
+  background: #f5f5f5;
+  background-color: #f5f5f5;
+  color: #1f2933;
+}
+
+.page {
+  height: 100vh;
+  position: relative;
+  box-sizing: border-box;
+  background: #f5f5f5;
+  overflow: hidden;
+}
+
+.chat {
+  position: fixed;
+  top: 96rpx;
+  left: 0;
+  right: 0;
+  box-sizing: border-box;
+  padding: 32rpx 28rpx 20rpx;
+}
+
+.entry-toolbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  height: 96rpx;
+  padding: 16rpx 28rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+  background: rgba(245, 245, 245, 0.96);
+  border-bottom: 1rpx solid #e8e8e8;
+}
+
+.entry-hint {
+  color: #7a6c5d;
+  font-size: 24rpx;
+}
+
+.entry-button {
+  width: auto;
+  min-width: 144rpx;
+  height: 64rpx;
+  margin: 0;
+  padding: 0 24rpx;
+  border-radius: 999rpx;
+  background: #ffffff;
+  color: #0b8f80;
+  border: 1rpx solid #bfe9e3;
+  font-size: 25rpx;
+  font-weight: 600;
+  line-height: 64rpx;
+}
+
+.message-row {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 22rpx;
+}
+
+.message-row.user {
+  align-items: flex-end;
+}
+
+.message-row.assistant {
+  align-items: flex-start;
+}
+
+.bubble {
+  max-width: 610rpx;
+  padding: 22rpx 28rpx;
+  border-radius: 30rpx;
+  font-size: 29rpx;
+  line-height: 1.55;
+  box-sizing: border-box;
+}
+
+.assistant .bubble {
+  background: #ffffff;
+  color: #263238;
+  border: 1rpx solid #eadfd2;
+  box-shadow: 0 8rpx 24rpx rgba(80, 64, 48, 0.045);
+}
+
+.user .bubble {
+  background: #16b8a6;
+  color: #ffffff;
+}
+
+.merchant-list {
+  width: 100%;
+  margin-top: 14rpx;
+  padding-bottom: 16rpx;
+}
+
+.merchant-card {
+  margin-bottom: 18rpx;
+  padding: 26rpx;
+  border-radius: 24rpx;
+  background: #ffffff;
+  border: 1rpx solid #eadfd2;
+  box-shadow: 0 10rpx 28rpx rgba(80, 64, 48, 0.05);
+}
+
+.merchant-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18rpx;
+}
+
+.merchant-name {
+  font-size: 32rpx;
+  font-weight: 700;
+}
+
+.merchant-meta {
+  margin-top: 8rpx;
+  color: #6b7280;
+  font-size: 24rpx;
+}
+
+.status {
+  flex-shrink: 0;
+  padding: 8rpx 14rpx;
+  border-radius: 999rpx;
+  font-size: 22rpx;
+}
+
+.status.online {
+  background: #e7faf6;
+  color: #0b8f80;
+}
+
+.status.offline {
+  background: #f3efe9;
+  color: #7a6c5d;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10rpx;
+  margin-top: 20rpx;
+}
+
+.tag {
+  padding: 8rpx 14rpx;
+  border-radius: 999rpx;
+  background: #f3f0ea;
+  color: #5b6570;
+  font-size: 23rpx;
+}
+
+.price {
+  margin-top: 18rpx;
+  color: #1f2933;
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.merchant-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 18rpx;
+  color: #6b7280;
+  font-size: 24rpx;
+}
+
+.call-button {
+  margin: 0;
+  min-width: 116rpx;
+  border-radius: 999rpx;
+  background: #ff7a45;
+  color: #ffffff;
+  font-size: 24rpx;
+  line-height: 2.2;
+}
+
+.quick-list {
+  display: flex;
+  gap: 12rpx;
+  padding: 18rpx 24rpx 14rpx;
+  overflow-x: auto;
+  background: #f5f5f5;
+  white-space: nowrap;
+  border-top: 1rpx solid #e8e8e8;
+}
+
+.footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  background: #f5f5f5;
+  transition: bottom 40ms linear;
+}
+
+.quick-item {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0 22rpx;
+  border-radius: 999rpx;
+  background: #ffffff;
+  color: #0b8f80;
+  font-size: 24rpx;
+  line-height: 64rpx;
+  border: 1rpx solid #eadfd2;
+  box-shadow: 0 6rpx 18rpx rgba(80, 64, 48, 0.035);
+}
+
+.composer {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  padding: 16rpx 24rpx 28rpx;
+  background: #f5f5f5;
+  border-top: 1rpx solid #e8e8e8;
+}
+
+.composer-input {
+  flex: 1;
+  min-width: 0;
+  height: 92rpx;
+  padding: 0 30rpx;
+  border-radius: 28rpx;
+  background: #ffffff;
+  border: 1rpx solid #eadfd2;
+  font-size: 30rpx;
+  box-sizing: border-box;
+  box-shadow: 0 10rpx 26rpx rgba(80, 64, 48, 0.05);
+}
+
+.send-button {
+  flex: 0 0 82rpx;
+  width: 82rpx !important;
+  min-width: 82rpx;
+  max-width: 82rpx;
+  height: 82rpx;
+  margin: 0;
+  padding: 0;
+  border-radius: 50%;
+  background: #16b8a6;
+  color: #ffffff;
+  font-size: 36rpx;
+  font-weight: 700;
+  line-height: 82rpx;
+  box-shadow: 0 10rpx 22rpx rgba(22, 184, 166, 0.22);
+}
+
+.send-button.sending,
+.quick-item[disabled] {
+  opacity: 0.55;
+}
+
+.send-button::after,
+.quick-item::after,
+.call-button::after,
+.entry-button::after {
+  border: 0;
+}
