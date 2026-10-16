@@ -243,7 +243,7 @@ function buildErrorMessage(error: unknown) {
   const message = error instanceof Error ? error.message : '请求失败';
 
   if (message.indexOf('request:fail') >= 0 || message.indexOf('网络请求失败') >= 0) {
-    return '我现在连不上后端服务。请确认本地后端已经启动，并且地址是 http://127.0.0.1:3000。';
+    return '我现在连不上服务，请检查网络后稍后重试。';
   }
 
   return message;
