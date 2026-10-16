@@ -2,9 +2,17 @@
 // const util = require('../../utils/util.js')
 import { formatTime } from '../../utils/util'
 
-Component({
+type LogItem = {
+  date: string;
+  timeStamp: string;
+};
+
+type LogsData = { logs: LogItem[] };
+type LogsInstance = WechatMiniprogram.Component.Instance<LogsData, {}, {}>;
+
+Component<LogsData, {}, {}>({
   data: {
-    logs: [],
+    logs: [] as LogItem[],
   },
   lifetimes: {
     attached() {
@@ -17,5 +25,5 @@ Component({
         }),
       })
     }
-  },
+  } as { attached(): void } & ThisType<LogsInstance>,
 })

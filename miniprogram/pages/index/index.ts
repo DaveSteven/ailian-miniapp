@@ -26,6 +26,14 @@ type ChatMessage = {
   role: 'assistant' | 'user';
   content: string;
   merchants?: Merchant[];
+  locationRequest?: boolean;
+  locationLoading?: boolean;
+};
+
+type UserLocation = {
+  latitude: number;
+  longitude: number;
+  communityName: string;
 };
 
 type ChatResponse = {
@@ -50,6 +58,70 @@ type Conversation = {
   updatedAt: number;
   timeLabel: string;
   messages: ChatMessage[];
+};
+
+type ChatPageData = {
+  inputValue: string;
+  keyboardHeightPx: number;
+  composerFocused: boolean;
+  chatBottomPx: number;
+  headerHeightPx: number;
+  statusBarHeightPx: number;
+  headerRightPx: number;
+  drawerTopPx: number;
+  isSending: boolean;
+  drawerOpen: boolean;
+  conversations: Conversation[];
+  activeConversationId: string;
+  messages: ChatMessage[];
+  quickNeeds: string[];
+  scrollIntoView: string;
+  pendingLocationMessage: string;
+  pendingLocationMessageId: string;
+};
+
+type ChatPageMethods = {
+  onInput(e: WechatMiniprogram.Input): void;
+  onInputFocus(e: { detail?: { height?: number } }): void;
+  onInputBlur(): void;
+  onQuickNeed(e: WechatMiniprogram.TouchEvent): void;
+  onSend(): void;
+  onCallMerchant(e: WechatMiniprogram.TouchEvent): void;
+  onAuthorizeLocation(): void;
+  resolveLocationForMessage(messageId: string): void;
+  showLocationRequest(messageId: string, denied?: boolean): void;
+  requestUserLocation(messageId: string): void;
+  handleLocationGranted(messageId: string, location: UserLocation): void;
+  handleLocationFailure(messageId: string, error?: { errMsg?: string }): void;
+  onOpenDrawer(): void;
+  onCloseDrawer(): void;
+  onDrawerTap(): void;
+  onNewConversation(): void;
+  onSelectConversation(e: WechatMiniprogram.TouchEvent): void;
+  onOpenSettings(): void;
+  persistCurrentConversation(): void;
+  sendMessage(rawMessage: string): void;
+  requestChatMessage(message: string, loadingMessageId: string, location: UserLocation): void;
+  startTypewriter(messageId: string, content: string, merchants: Merchant[]): void;
+  clearTypingTimer(): void;
+  updateKeyboardHeight(height: number): void;
+};
+
+type ChatPageCustomProperties = {
+  keyboardHeightListener?: (res: WechatMiniprogram.OnKeyboardHeightChangeCallbackResult) => void;
+  typingTimer?: ReturnType<typeof setTimeout>;
+};
+
+type ChatPageInstance = WechatMiniprogram.Component.Instance<
+  ChatPageData,
+  {},
+  ChatPageMethods,
+  ChatPageCustomProperties
+>;
+
+type ChatPageLifetimes = {
+  attached(): void;
+  detached(): void;
 };
 
 type WindowInfo = { windowWidth: number; statusBarHeight: number };
@@ -90,7 +162,7 @@ function getWindowInfo() {
   return (wx as unknown as { getWindowInfo(): WindowInfo }).getWindowInfo();
 }
 
-Component({
+Component<ChatPageData, {}, ChatPageMethods, ChatPageCustomProperties>({
   data: {
     inputValue: '',
     keyboardHeightPx: 0,
@@ -107,6 +179,8 @@ Component({
     messages: [WELCOME_MESSAGE] as ChatMessage[],
     quickNeeds: ['厨房下水堵了，很急', '钥匙丢了要开锁'],
     scrollIntoView: 'welcome',
+    pendingLocationMessage: '',
+    pendingLocationMessageId: '',
   },
 
   lifetimes: {
@@ -129,7 +203,7 @@ Component({
         this.updateKeyboardHeight(res.height || 0);
       };
 
-      (this as any).keyboardHeightListener = keyboardHeightListener;
+      this.keyboardHeightListener = keyboardHeightListener;
       wx.onKeyboardHeightChange(keyboardHeightListener);
 
       this.setData({
@@ -140,8 +214,8 @@ Component({
     },
 
     detached() {
-      const keyboardHeightListener = (this as any).keyboardHeightListener;
-      const typingTimer = (this as any).typingTimer;
+      const keyboardHeightListener = this.keyboardHeightListener;
+      const typingTimer = this.typingTimer;
 
       if (keyboardHeightListener && wx.offKeyboardHeightChange) {
         wx.offKeyboardHeightChange(keyboardHeightListener);
@@ -151,7 +225,7 @@ Component({
         clearTimeout(typingTimer);
       }
     },
-  },
+  } as ChatPageLifetimes & ThisType<ChatPageInstance>,
 
   methods: {
     onInput(e: WechatMiniprogram.Input) {
@@ -160,7 +234,7 @@ Component({
       });
     },
 
-    onInputFocus(e: any) {
+    onInputFocus(e: { detail?: { height?: number } }) {
       const height = e && e.detail && e.detail.height ? e.detail.height : 0;
       this.setData({ composerFocused: true }, () => this.updateKeyboardHeight(height));
     },
@@ -186,6 +260,143 @@ Component({
       });
     },
 
+    onAuthorizeLocation() {
+      const messageId = this.data.pendingLocationMessageId;
+      if (!this.data.pendingLocationMessage || !messageId) return;
+
+      wx.getSetting({
+        success: (settings) => {
+          if (settings.authSetting['scope.userLocation'] === false) {
+            wx.openSetting({
+              success: (result) => {
+                if (result.authSetting['scope.userLocation']) {
+                  this.requestUserLocation(messageId);
+                  return;
+                }
+                this.showLocationRequest(messageId, true);
+              },
+              fail: () => this.showLocationRequest(messageId, true),
+            });
+            return;
+          }
+
+          this.requestUserLocation(messageId);
+        },
+        fail: () => this.requestUserLocation(messageId),
+      });
+    },
+
+    resolveLocationForMessage(messageId: string) {
+      wx.getSetting({
+        success: (settings) => {
+          if (settings.authSetting['scope.userLocation'] === true) {
+            this.requestUserLocation(messageId);
+            return;
+          }
+          this.showLocationRequest(messageId, settings.authSetting['scope.userLocation'] === false);
+        },
+        fail: () => this.showLocationRequest(messageId),
+      });
+    },
+
+    showLocationRequest(messageId: string, denied = false) {
+      if (this.data.pendingLocationMessageId !== messageId) return;
+
+      const messages = this.data.messages.map((item) => (
+        item.id === messageId
+          ? {
+            ...item,
+            content: denied
+              ? '定位权限尚未开启。点击这里前往设置并授权。'
+              : '为了推荐你附近的服务，需要获取你的位置。点击这里授权。',
+            locationRequest: true,
+            locationLoading: false,
+          }
+          : item
+      ));
+      this.setData({ messages, isSending: false, scrollIntoView: messageId });
+    },
+
+    requestUserLocation(messageId: string) {
+      if (this.data.pendingLocationMessageId !== messageId) return;
+      const locationMessage = this.data.messages.find((item) => item.id === messageId);
+      if (!locationMessage || locationMessage.locationLoading) return;
+
+      const messages = this.data.messages.map((item) => (
+        item.id === messageId
+          ? {
+            ...item,
+            content: '正在获取你的位置…',
+            locationRequest: false,
+            locationLoading: true,
+          }
+          : item
+      ));
+      this.setData({ messages, isSending: true });
+
+      wx.getLocation({
+        type: 'gcj02',
+        success: (result) => this.handleLocationGranted(messageId, {
+          latitude: Number(result.latitude),
+          longitude: Number(result.longitude),
+          communityName: '当前位置',
+        }),
+        fail: (error) => this.handleLocationFailure(messageId, error),
+      });
+    },
+
+    handleLocationGranted(messageId: string, location: UserLocation) {
+      const message = this.data.pendingLocationMessage;
+      if (!message || this.data.pendingLocationMessageId !== messageId) return;
+
+      const messages = this.data.messages.map((item) => (
+        item.id === messageId
+          ? {
+            ...item,
+            content: '我正在从附近商户库里帮你筛选。',
+            locationRequest: false,
+            locationLoading: false,
+          }
+          : item
+      ));
+      this.setData({
+        pendingLocationMessage: '',
+        pendingLocationMessageId: '',
+        messages,
+        isSending: true,
+        scrollIntoView: messageId,
+      });
+      this.requestChatMessage(message, messageId, location);
+    },
+
+    handleLocationFailure(messageId: string, error?: { errMsg?: string }) {
+      if (this.data.pendingLocationMessageId !== messageId) return;
+      const cancelled = error?.errMsg?.includes('cancel');
+
+      wx.getSetting({
+        success: (settings) => {
+          if (settings.authSetting['scope.userLocation'] === false) {
+            this.showLocationRequest(messageId, true);
+            return;
+          }
+          const messages = this.data.messages.map((item) => (
+            item.id === messageId
+              ? {
+                ...item,
+                content: cancelled
+                  ? '你已取消定位。需要附近服务时，点击这里重试。'
+                  : '暂时无法获取当前位置，请检查系统定位后点击重试。',
+                locationRequest: true,
+                locationLoading: false,
+              }
+              : item
+          ));
+          this.setData({ messages, isSending: false });
+        },
+        fail: () => this.showLocationRequest(messageId),
+      });
+    },
+
     onOpenDrawer() {
       this.setData({ drawerOpen: true });
     },
@@ -206,6 +417,8 @@ Component({
         messages: [WELCOME_MESSAGE],
         inputValue: '',
         isSending: false,
+        pendingLocationMessage: '',
+        pendingLocationMessageId: '',
         scrollIntoView: 'welcome',
         drawerOpen: false,
       });
@@ -217,11 +430,18 @@ Component({
       const id = String(e.currentTarget.dataset.id || '');
       const conversation = this.data.conversations.find((item) => item.id === id);
       if (!conversation) return;
-      const lastMessage = conversation.messages[conversation.messages.length - 1];
+      const messages = conversation.messages.map((item) => (
+        item.locationLoading ? { ...item, locationLoading: false, locationRequest: true } : item
+      ));
+      const locationRequest = messages.find((item) => item.locationRequest);
+      const lastUserMessage = [...messages].reverse().find((item) => item.role === 'user');
+      const lastMessage = messages[messages.length - 1];
       this.setData({
         activeConversationId: conversation.id,
-        messages: conversation.messages,
+        messages,
         isSending: false,
+        pendingLocationMessage: locationRequest ? lastUserMessage?.content || '' : '',
+        pendingLocationMessageId: locationRequest?.id || '',
         scrollIntoView: lastMessage?.id || 'welcome',
         drawerOpen: false,
       });
@@ -266,6 +486,11 @@ Component({
         return;
       }
 
+      if (this.data.pendingLocationMessage) {
+        wx.showToast({ title: '请先点击消息授权位置', icon: 'none' });
+        return;
+      }
+
       const timestamp = Date.now();
       const userMessage: ChatMessage = {
         id: `user_${timestamp}`,
@@ -275,30 +500,28 @@ Component({
       const loadingMessage: ChatMessage = {
         id: `assistant_loading_${timestamp}`,
         role: 'assistant',
-        content: '我正在从附近商户库里帮你筛选。',
+        content: '正在确认当前位置…',
       };
 
       this.setData({
         inputValue: '',
         isSending: true,
+        pendingLocationMessage: message,
+        pendingLocationMessageId: loadingMessage.id,
         messages: [...this.data.messages, userMessage, loadingMessage],
         scrollIntoView: loadingMessage.id,
       });
 
-      this.requestChatMessage(message, loadingMessage.id);
+      this.resolveLocationForMessage(loadingMessage.id);
     },
 
-    requestChatMessage(message: string, loadingMessageId: string) {
+    requestChatMessage(message: string, loadingMessageId: string, location: UserLocation) {
       requestApi<ChatResponse, ChatRequestBody>({
         method: 'POST',
         path: '/chat/message',
         data: {
           message,
-          location: {
-            latitude: 31.234567,
-            longitude: 121.512345,
-            communityName: '当前小区',
-          },
+          location,
         },
       })
         .then((response) => {
@@ -378,7 +601,7 @@ Component({
             return;
           }
 
-          (this as any).typingTimer = setTimeout(renderNextCharacter, 50);
+          this.typingTimer = setTimeout(renderNextCharacter, 50);
         });
       };
 
@@ -394,11 +617,11 @@ Component({
     },
 
     clearTypingTimer() {
-      const typingTimer = (this as any).typingTimer;
+      const typingTimer = this.typingTimer;
 
       if (typingTimer) {
         clearTimeout(typingTimer);
-        (this as any).typingTimer = undefined;
+        this.typingTimer = undefined;
       }
     },
 
@@ -410,7 +633,7 @@ Component({
         chatBottomPx: getFooterBaseHeightPx(this.data.composerFocused) + keyboardHeightPx,
       });
     },
-  },
+  } as ChatPageMethods & ThisType<ChatPageInstance>,
 });
 
 function normalizeMerchants(merchants: Merchant[]) {

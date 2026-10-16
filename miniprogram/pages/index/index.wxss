@@ -88,6 +88,17 @@ page {
   color: #263238;
 }
 
+.assistant .location-request {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  color: #0b8f80;
+}
+
+.assistant .location-request.loading {
+  opacity: 0.65;
+}
+
 .user .bubble {
   background: #16b8a6;
   color: #ffffff;

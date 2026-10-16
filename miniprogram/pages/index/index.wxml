@@ -41,7 +41,17 @@
 
   <scroll-view class="chat" style="top: {{headerHeightPx}}px; bottom: {{chatBottomPx}}px" scroll-y scroll-into-view="{{scrollIntoView}}">
     <view class="message-row {{item.role}}" wx:for="{{messages}}" wx:key="id" id="{{item.id}}">
-      <view class="bubble">{{item.content}}</view>
+      <view class="bubble" wx:if="{{!item.locationRequest}}">{{item.content}}</view>
+      <view
+        class="bubble location-request {{item.locationLoading ? 'loading' : ''}}"
+        wx:else
+        role="button"
+        aria-label="授权获取当前位置"
+        bindtap="onAuthorizeLocation"
+      >
+        <van-icon name="location-o" size="32rpx" />
+        <text>{{item.content}}</text>
+      </view>
 
       <view class="merchant-list" wx:if="{{item.merchants && item.merchants.length}}">
         <view class="merchant-card" wx:for="{{item.merchants}}" wx:for-item="merchant" wx:key="id">

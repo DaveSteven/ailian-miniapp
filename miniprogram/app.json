@@ -8,7 +8,7 @@
   ],
   "permission": {
     "scope.userLocation": {
-      "desc": "用于帮助地推人员记录商家的准确位置"
+      "desc": "用于推荐附近服务，并帮助地推人员记录商家的准确位置"
     }
   },
   "requiredPrivateInfos": [
