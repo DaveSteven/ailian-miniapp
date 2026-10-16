@@ -15,7 +15,6 @@ page {
 
 .chat {
   position: fixed;
-  top: 96rpx;
   left: 0;
   right: 0;
   box-sizing: border-box;
@@ -28,35 +27,38 @@ page {
   left: 0;
   right: 0;
   z-index: 10;
-  height: 96rpx;
-  padding: 16rpx 28rpx;
+  padding: 0 28rpx;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   box-sizing: border-box;
   background: rgba(245, 245, 245, 0.96);
   border-bottom: 1rpx solid #e8e8e8;
 }
 
-.entry-hint {
-  color: #7a6c5d;
-  font-size: 24rpx;
-}
+.menu-button { width: 68rpx; min-width: 68rpx; max-width: 68rpx; height: 68rpx; flex: 0 0 68rpx; margin: 0; display: flex; align-items: center; justify-content: center; border-radius: 18rpx; background: #fff; color: #36534d; box-shadow: 0 5rpx 16rpx rgba(54,78,72,.07); box-sizing: border-box; }
 
-.entry-button {
-  width: auto;
-  min-width: 144rpx;
-  height: 64rpx;
-  margin: 0;
-  padding: 0 24rpx;
-  border-radius: 999rpx;
-  background: #ffffff;
-  color: #0b8f80;
-  border: 1rpx solid #bfe9e3;
-  font-size: 25rpx;
-  font-weight: 600;
-  line-height: 64rpx;
-}
+.drawer-layer { position: fixed; inset: 0; z-index: 100; visibility: hidden; background: rgba(18,35,31,0); transition: background .22s ease,visibility .22s; }
+.drawer-layer.open { visibility: visible; background: rgba(18,35,31,.38); }
+.drawer { position: absolute; top: 0; bottom: 0; left: 0; width: 620rpx; max-width: 84vw; padding: 38rpx 26rpx calc(28rpx + env(safe-area-inset-bottom)); display: flex; flex-direction: column; box-sizing: border-box; background: #f9fbfa; box-shadow: 18rpx 0 48rpx rgba(25,54,48,.14); transform: translateX(-102%); transition: transform .24s ease; }
+.drawer-layer.open .drawer { transform: translateX(0); }
+.drawer-brand { padding: 0 10rpx 34rpx; display: flex; align-items: center; gap: 18rpx; border-bottom: 1rpx solid #e5ece9; }
+.drawer-logo { width: 78rpx; height: 78rpx; display: flex; align-items: center; justify-content: center; border-radius: 22rpx; background: linear-gradient(145deg,#123f39,#148878); color: #fff; font-size: 24rpx; font-weight: 700; letter-spacing: 2rpx; }
+.drawer-brand>view:last-child { display: flex; flex-direction: column; }
+.drawer-brand b { color: #173c36; font-size: 32rpx; }
+.drawer-brand span { margin-top: 4rpx; color: #879590; font-size: 21rpx; }
+.history-label { padding: 30rpx 14rpx 16rpx; color: #8b9894; font-size: 21rpx; font-weight: 600; letter-spacing: 2rpx; }
+.history-list { flex: 1; min-height: 0; }
+.history-item { width: 100%; min-height: 92rpx; margin: 0 0 8rpx; padding: 16rpx 17rpx; display: flex; align-items: center; justify-content: space-between; border-radius: 17rpx; background: transparent; text-align: left; box-sizing: border-box; }
+.history-item.active { background: #e8f4f1; }
+.history-copy { min-width: 0; display: flex; flex-direction: column; }
+.history-copy text { max-width: 450rpx; overflow: hidden; color: #334a45; font-size: 25rpx; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.history-copy span { margin-top: 6rpx; color: #9ca8a4; font-size: 19rpx; }
+.history-arrow { color: #9aa7a3; }
+.history-empty { padding: 70rpx 20rpx; color: #a3adaa; text-align: center; font-size: 23rpx; }
+.drawer-bottom { padding-top: 20rpx; display: grid; grid-template-columns: 1fr 1fr; gap: 14rpx; border-top: 1rpx solid #e5ece9; }
+.drawer-action { width: 100%; min-width: 0; height: 84rpx; margin: 0; padding: 0 16rpx; display: flex; align-items: center; justify-content: center; gap: 10rpx; border-radius: 18rpx; background: #edf2f0; color: #48605a; font-size: 24rpx; font-weight: 600; box-sizing: border-box; }
+.drawer-action.primary { background: #147f71; color: #fff; }
 
 .message-row {
   display: flex;
@@ -82,10 +84,8 @@ page {
 }
 
 .assistant .bubble {
-  background: #ffffff;
+  padding: 0 4rpx;
   color: #263238;
-  border: 1rpx solid #eadfd2;
-  box-shadow: 0 8rpx 24rpx rgba(80, 64, 48, 0.045);
 }
 
 .user .bubble {
@@ -186,12 +186,12 @@ page {
 
 .quick-list {
   display: flex;
-  gap: 12rpx;
-  padding: 18rpx 24rpx 14rpx;
-  overflow-x: auto;
+  gap: 24rpx;
+  padding: 10rpx 76rpx 8rpx;
+  overflow: hidden;
   background: #f5f5f5;
   white-space: nowrap;
-  border-top: 1rpx solid #e8e8e8;
+  box-sizing: border-box;
 }
 
 .footer {
@@ -204,46 +204,56 @@ page {
 }
 
 .quick-item {
-  flex-shrink: 0;
-  margin: 0;
-  padding: 0 22rpx;
-  border-radius: 999rpx;
-  background: #ffffff;
+  min-width: 0;
+  overflow: hidden;
   color: #0b8f80;
-  font-size: 24rpx;
-  line-height: 64rpx;
-  border: 1rpx solid #eadfd2;
-  box-shadow: 0 6rpx 18rpx rgba(80, 64, 48, 0.035);
+  font-size: 22rpx;
+  line-height: 36rpx;
+  text-overflow: ellipsis;
 }
 
 .composer {
-  display: flex;
-  align-items: center;
-  gap: 14rpx;
-  padding: 16rpx 24rpx 28rpx;
-  background: #f5f5f5;
-  border-top: 1rpx solid #e8e8e8;
+  position: relative;
+  height: 84rpx;
+  margin: 12rpx 72rpx 80rpx;
+  overflow: hidden;
+  border: 1rpx solid #eadfd2;
+  border-radius: 42rpx;
+  background: #ffffff;
+  box-shadow: 0 8rpx 24rpx rgba(80, 64, 48, 0.045);
+  transition: height 180ms ease, border-radius 180ms ease, margin-bottom 180ms ease;
+  box-sizing: border-box;
+}
+
+.composer.focused {
+  height: 164rpx;
+  margin: 12rpx 36rpx 16rpx;
+  border-radius: 30rpx;
 }
 
 .composer-input {
-  flex: 1;
-  min-width: 0;
-  height: 92rpx;
+  width: 100%;
+  height: 100%;
   padding: 0 30rpx;
-  border-radius: 28rpx;
-  background: #ffffff;
-  border: 1rpx solid #eadfd2;
+  background: transparent;
   font-size: 30rpx;
+  line-height: 82rpx;
   box-sizing: border-box;
-  box-shadow: 0 10rpx 26rpx rgba(80, 64, 48, 0.05);
+}
+
+.composer.focused .composer-input {
+  padding: 14rpx 112rpx 62rpx 30rpx;
+  line-height: 42rpx;
 }
 
 .send-button {
-  flex: 0 0 82rpx;
-  width: 82rpx !important;
-  min-width: 82rpx;
-  max-width: 82rpx;
-  height: 82rpx;
+  position: absolute;
+  right: 12rpx;
+  bottom: 12rpx;
+  width: 64rpx !important;
+  min-width: 64rpx;
+  max-width: 64rpx;
+  height: 64rpx;
   margin: 0;
   padding: 0;
   border-radius: 50%;
@@ -251,18 +261,16 @@ page {
   color: #ffffff;
   font-size: 36rpx;
   font-weight: 700;
-  line-height: 82rpx;
+  line-height: 64rpx;
   box-shadow: 0 10rpx 22rpx rgba(22, 184, 166, 0.22);
 }
 
 .send-button.sending,
-.quick-item[disabled] {
+.quick-item.disabled {
   opacity: 0.55;
 }
 
 .send-button::after,
-.quick-item::after,
-.call-button::after,
-.entry-button::after {
+.call-button::after {
   border: 0;
 }

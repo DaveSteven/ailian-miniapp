@@ -1,0 +1,16 @@
+<view class="settings-page">
+  <view class="profile-card">
+    <image class="profile-avatar" wx:if="{{avatarUrl}}" src="{{avatarUrl}}" mode="aspectFill" />
+    <view class="profile-avatar fallback" wx:else>{{initial}}</view>
+    <view><text>{{nickname}}</text><span>{{phone || '微信授权用户'}}</span></view>
+  </view>
+
+  <view class="settings-group" wx:if="{{isStaff}}">
+    <view class="settings-label">工作台</view>
+    <view class="settings-item" role="button" bindtap="onOpenMerchantEntry">
+      <view class="item-icon">推</view>
+      <view class="item-copy"><text>地推人员入口</text><span>录入商家资料和现场信息</span></view>
+      <text class="item-arrow">›</text>
+    </view>
+  </view>
+</view>

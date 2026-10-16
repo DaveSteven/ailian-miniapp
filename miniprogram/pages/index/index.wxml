@@ -1,10 +1,45 @@
 <view class="page">
-  <view class="entry-toolbar">
-    <view class="entry-hint">需要录入新商家？</view>
-    <button class="entry-button" bindtap="onOpenMerchantEntry">地推录入</button>
+  <view
+    class="entry-toolbar"
+    style="height: {{headerHeightPx}}px; padding-top: {{statusBarHeightPx}}px; padding-right: {{headerRightPx}}px;"
+  >
+    <view class="menu-button" role="button" aria-label="打开对话列表" bindtap="onOpenDrawer">
+      <van-icon name="bars" size="40rpx" />
+    </view>
   </view>
 
-  <scroll-view class="chat" style="bottom: {{chatBottomPx}}px" scroll-y scroll-into-view="{{scrollIntoView}}">
+  <view class="drawer-layer {{drawerOpen ? 'open' : ''}}" catchtap="onCloseDrawer">
+    <view class="drawer" style="padding-top: {{drawerTopPx}}px" catchtap="onDrawerTap">
+      <view class="drawer-brand">
+        <view class="drawer-logo">爱联</view>
+        <view><b>爱联</b><span>你的赛博邻居</span></view>
+      </view>
+
+      <view class="history-label">对话历史</view>
+      <scroll-view class="history-list" scroll-y>
+        <view
+          class="history-item {{item.id === activeConversationId ? 'active' : ''}}"
+          wx:for="{{conversations}}"
+          wx:key="id"
+          data-id="{{item.id}}"
+          role="button"
+          aria-label="打开对话：{{item.title}}"
+          bindtap="onSelectConversation"
+        >
+          <view class="history-copy"><text>{{item.title}}</text><span>{{item.timeLabel}}</span></view>
+          <van-icon class="history-arrow" name="arrow" size="28rpx" />
+        </view>
+        <view class="history-empty" wx:if="{{!conversations.length}}">还没有历史对话</view>
+      </scroll-view>
+
+      <view class="drawer-bottom">
+        <view class="drawer-action primary" role="button" aria-label="创建新对话" bindtap="onNewConversation"><van-icon name="plus" size="30rpx" /><span>新对话</span></view>
+        <view class="drawer-action" role="button" aria-label="打开设置" bindtap="onOpenSettings"><van-icon name="setting-o" size="30rpx" /><span>设置</span></view>
+      </view>
+    </view>
+  </view>
+
+  <scroll-view class="chat" style="top: {{headerHeightPx}}px; bottom: {{chatBottomPx}}px" scroll-y scroll-into-view="{{scrollIntoView}}">
     <view class="message-row {{item.role}}" wx:for="{{messages}}" wx:key="id" id="{{item.id}}">
       <view class="bubble">{{item.content}}</view>
 
@@ -36,25 +71,37 @@
 
   <view class="footer" style="bottom: {{keyboardHeightPx}}px">
     <view class="quick-list">
-      <button class="quick-item" wx:for="{{quickNeeds}}" wx:key="*this" data-text="{{item}}" disabled="{{isSending}}" bindtap="onQuickNeed">
-        {{item}}
-      </button>
+      <view
+        class="quick-item {{isSending ? 'disabled' : ''}}"
+        wx:for="{{quickNeeds}}"
+        wx:key="*this"
+        data-text="{{item}}"
+        role="button"
+        aria-disabled="{{isSending}}"
+        bindtap="onQuickNeed"
+      >
+        # {{item}}
+      </view>
     </view>
 
-    <view class="composer">
-      <input
+    <view class="composer {{composerFocused ? 'focused' : ''}}">
+      <textarea
         class="composer-input"
         value="{{inputValue}}"
         placeholder="直接说：我家厨房下水堵了，很急"
-        confirm-type="send"
+        confirm-type="return"
+        show-confirm-bar="{{false}}"
+        fixed="{{true}}"
+        maxlength="-1"
         adjust-position="{{false}}"
         cursor-spacing="0"
         bindinput="onInput"
         bindfocus="onInputFocus"
         bindblur="onInputBlur"
-        bindconfirm="onSend"
       />
-      <button class="send-button {{isSending ? 'sending' : ''}}" aria-label="发送" disabled="{{isSending}}" bindtap="onSend">↑</button>
+      <button wx:if="{{composerFocused}}" class="send-button {{isSending ? 'sending' : ''}}" aria-label="发送" disabled="{{isSending}}" bindtap="onSend">
+        <van-icon name="upgrade" size="38rpx" />
+      </button>
     </view>
   </view>
 </view>

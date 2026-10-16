@@ -1,8 +1,18 @@
 <view class="page">
+  <view class="auth-state" wx:if="{{!authorized}}">
+    <view class="auth-card">
+      <view class="auth-logo">爱联</view>
+      <view class="auth-title">暂无地推权限</view>
+      <view class="auth-desc">地推身份由登录时的手机号自动识别，普通用户无法自行申请或授权。</view>
+      <view class="auth-message" wx:if="{{authMessage}}">{{authMessage}}</view>
+    </view>
+  </view>
+
+  <block wx:else>
   <view class="intro-card">
     <view class="intro-badge">地推采集</view>
     <view class="intro-title">录入商家资料</view>
-    <view class="intro-desc">请在商家现场确认位置，带 * 的项目为必填。</view>
+    <view class="intro-desc">{{staffName}}，请在商家现场确认位置，带 * 的项目为必填。</view>
   </view>
 
   <view class="section">
@@ -121,4 +131,5 @@
     <button class="submit-button" loading="{{submitting}}" disabled="{{submitting}}" bindtap="onSubmit">{{submitStage}}</button>
     <view class="submit-tip">提交后将进入审核，不会立即展示给用户</view>
   </view>
+  </block>
 </view>

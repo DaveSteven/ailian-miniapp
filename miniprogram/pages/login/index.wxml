@@ -1,0 +1,37 @@
+<view class="login-page">
+  <view class="home-preview" aria-hidden="true">
+    <view class="preview-header">
+      <view class="preview-menu"><text></text><text></text><text></text></view>
+    </view>
+
+    <view class="preview-chat">
+      <view class="preview-message">我是你的赛博邻居。告诉我遇到的问题，我帮你找附近靠谱的人。</view>
+      <view class="preview-message user">我家厨房下水堵了，很急</view>
+    </view>
+
+    <view class="preview-footer">
+      <view class="preview-suggestions"><text># 厨房下水堵了</text><text># 钥匙丢了要开锁</text></view>
+      <view class="preview-composer">直接说说你遇到什么事</view>
+    </view>
+  </view>
+
+  <view class="login-mask"></view>
+
+  <view class="login-card">
+    <view class="brand-mark">爱联</view>
+    <view class="brand-name">赛博邻居</view>
+    <view class="login-title">为了更好地使用本产品</view>
+    <view class="login-description">请先完成微信授权登录，我们将为你保存对话，并提供更准确的本地生活服务。</view>
+
+    <view class="auth-note">
+      <text>✓</text>
+      <view>手机号仅用于创建账号和识别服务身份</view>
+    </view>
+
+    <button class="wechat-button" loading="{{checking}}" disabled="{{loggingIn || checking}}" open-type="getPhoneNumber" bindgetphonenumber="onWechatLogin">
+      {{checking ? '正在检查登录状态…' : loggingIn ? '正在进入…' : '微信授权登录'}}
+    </button>
+    <view class="error-message" wx:if="{{errorMessage}}">{{errorMessage}}</view>
+    <view class="privacy-tip">登录即表示你同意授权必要的账号信息</view>
+  </view>
+</view>

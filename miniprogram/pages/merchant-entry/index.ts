@@ -56,12 +56,6 @@ type Staff = {
   role: 'field_agent' | 'reviewer' | 'admin';
 };
 
-type StaffLoginResponse = {
-  token: string;
-  expiresAt: string;
-  staff: Staff;
-};
-
 type StaffMeResponse = {
   staff: Staff;
 };
@@ -92,7 +86,7 @@ Page({
   },
 
   async onLoad() {
-    await this.authenticateStaff();
+    await this.restoreStaffSession();
 
     requestApi<CategoryResponse>({ path: '/services/categories' })
       .then((response) => {
@@ -107,37 +101,22 @@ Page({
       });
   },
 
-  async authenticateStaff() {
+  async restoreStaffSession() {
     this.setData({ authChecking: true, authMessage: '' });
 
+    const cachedToken = String(wx.getStorageSync('staffSessionToken') || '');
+
+    if (!cachedToken) {
+      this.setData({ authChecking: false, authorized: false, authMessage: '当前账号没有地推权限，请返回设置页。' });
+      return;
+    }
+
     try {
-      const cachedToken = String(wx.getStorageSync('staffSessionToken') || '');
-
-      if (cachedToken) {
-        try {
-          const response = await requestApi<StaffMeResponse>({ path: '/auth/me' });
-          this.setAuthorizedStaff(response.staff);
-          return;
-        } catch {
-          wx.removeStorageSync('staffSessionToken');
-        }
-      }
-
-      const loginResult = await wechatLogin();
-      const response = await requestApi<StaffLoginResponse, { code: string }>({
-        method: 'POST',
-        path: '/auth/wechat',
-        data: { code: loginResult.code },
-      });
-
-      wx.setStorageSync('staffSessionToken', response.token);
+      const response = await requestApi<StaffMeResponse>({ path: '/auth/me', auth: 'staff' });
       this.setAuthorizedStaff(response.staff);
-    } catch (error) {
-      this.setData({
-        authChecking: false,
-        authorized: false,
-        authMessage: error instanceof Error ? error.message : '身份验证失败，请稍后重试。',
-      });
+    } catch {
+      wx.removeStorageSync('staffSessionToken');
+      this.setData({ authChecking: false, authorized: false, authMessage: '地推登录已失效，请重新进行微信授权登录。' });
     }
   },
 
@@ -148,10 +127,6 @@ Page({
       staffName: staff.name,
       authMessage: '',
     });
-  },
-
-  onRetryAuth() {
-    this.authenticateStaff();
   },
 
   onFieldInput(event: WechatMiniprogram.Input) {
@@ -328,6 +303,7 @@ Page({
       const duplicateResult = await requestApi<DuplicateResponse, MerchantPayload>({
         method: 'POST',
         path: '/merchants/check-duplicate',
+        auth: 'staff',
         data: payload,
       });
 
@@ -351,6 +327,7 @@ Page({
       const response = await requestApi<CreateResponse, MerchantPayload>({
         method: 'POST',
         path: '/merchants/',
+        auth: 'staff',
         data: payload,
       });
 
@@ -444,10 +421,4 @@ function showSuccess(merchantId: string) {
 
 function maskPhone(phone: string) {
   return phone.length === 11 ? `${phone.slice(0, 3)}****${phone.slice(-4)}` : phone;
-}
-
-function wechatLogin() {
-  return new Promise<WechatMiniprogram.LoginSuccessCallbackResult>((resolve, reject) => {
-    wx.login({ success: resolve, fail: reject });
-  });
 }

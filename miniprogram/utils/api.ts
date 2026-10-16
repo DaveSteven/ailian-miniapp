@@ -1,3 +1,5 @@
+import { clearUserSession, getUserToken } from './user-session';
+
 const TEST_API_BASE_URL = 'https://test-api.ailian.help/api/v1';
 
 function getApiBaseUrl() {
@@ -10,11 +12,15 @@ type RequestOptions<TBody extends RequestBody> = {
   method?: 'GET' | 'POST';
   path: string;
   data?: TBody;
+  auth?: 'user' | 'staff' | 'none';
 };
 
 export function requestApi<TResponse, TBody extends RequestBody = WechatMiniprogram.IAnyObject>(
   options: RequestOptions<TBody>,
 ): Promise<TResponse> {
+  const auth = options.auth || 'user';
+  const token = auth === 'staff' ? getStaffToken() : auth === 'user' ? getUserToken() : '';
+
   return new Promise((resolve, reject) => {
     wx.request({
       url: `${getApiBaseUrl()}${options.path}`,
@@ -22,7 +28,7 @@ export function requestApi<TResponse, TBody extends RequestBody = WechatMiniprog
       data: options.data,
       header: {
         'content-type': 'application/json',
-        ...(getStaffToken() ? { authorization: `Bearer ${getStaffToken()}` } : {}),
+        ...(token ? { authorization: `Bearer ${token}` } : {}),
       },
       success(res) {
         if (res.statusCode >= 200 && res.statusCode < 300) {
@@ -31,7 +37,8 @@ export function requestApi<TResponse, TBody extends RequestBody = WechatMiniprog
         }
 
         if (res.statusCode === 401) {
-          wx.removeStorageSync('staffSessionToken');
+          if (auth === 'staff') wx.removeStorageSync('staffSessionToken');
+          if (auth === 'user') clearUserSession();
         }
 
         reject(normalizeRequestError(res.data));
@@ -63,6 +70,7 @@ export async function uploadImage(filePath: string, category: UploadCategory): P
     method: 'POST',
     path: '/uploads/images/presign',
     data: { contentType, category },
+    auth: 'staff',
   });
 
   if (authorization.upload.mode === 'server') {
